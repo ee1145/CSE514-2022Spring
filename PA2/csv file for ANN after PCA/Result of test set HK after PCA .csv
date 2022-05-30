@@ -1,0 +1,2 @@
+name,model training time,model operation time,validation_accuracy
+sigmoid_model_HK,898.0584145,35.89081764,0.871621609

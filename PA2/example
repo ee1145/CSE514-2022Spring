@@ -1,0 +1,352 @@
+header = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+data = pd.read_csv(r"breast-cancer-wisconsin.data", names=header, na_values="?")
+data.drop(0, axis=1, inplace=True)
+X = np.array(data.drop(10, axis=1))
+y = np.array(data[10])
+y = np.where(y == 2, 0, 1)
+
+# impute missing values
+imputer = KNNImputer(n_neighbors=1, weights="uniform")
+X = imputer.fit_transform(X)
+
+X_train, X_val, y_train_1d, y_val_1d = train_test_split(X, y, test_size=0.1, random_state=42)
+
+y_train = y_train_1d.reshape(-1, 1)
+y_val = y_val_1d.reshape(-1, 1)
+
+y_train_onehot = np.array(pd.get_dummies(y_train_1d))
+y_val_onehot = np.array(pd.get_dummies(y_val_1d))
+print(X.shape)
+
+
+
+#Set training and testing set for each pair, after reshape they will become one row
+#pair of H and K
+X_H_and_K_train, X_H_and_K_value, Y_H_and_K_train, Y_H_and_K_value = train_test_split(X_H_and_K, Y_H_and_K , test_size=0.1, random_state=42) #42
+Y_H_and_K_train_reshaped = Y_H_and_K_train.reshape(-1, 1)
+Y_H_and_K_value_reshaped = Y_H_and_K_value.reshape(-1, 1)
+#pair of M and Y
+X_M_and_Y_train, X_M_and_Y_value, Y_M_and_Y_train, Y_M_and_Y_value = train_test_split(X_M_and_Y, Y_M_and_Y, test_size=0.1, random_state=42) #42
+Y_M_and_Y_train_reshaped = Y_M_and_Y_train.reshape(-1, 1)
+Y_M_and_Y_value_reshaped = Y_M_and_Y_value.reshape(-1, 1)
+#pair of M and Y
+X_L_and_Z_train, X_L_and_Z_value, Y_L_and_Z_train, Y_L_and_Z_value = train_test_split(X_L_and_Z, Y_L_and_Z, test_size=0.1, random_state=42) #42
+Y_L_and_Z_train_reshaped = Y_L_and_Z_train.reshape(-1, 1)
+Y_L_and_Z_value_reshaped = Y_L_and_Z_value.reshape(-1, 1)
+
+
+
+
+best_models_H_and_K_NN = [{{'name': 'Model with sigmoid activation function'
+, 'best_node': 17}
+, {'name': 'Model with Relu activation function', 'best_node': 20}
+, {'name': 'Model with tanh activation function', 'best_node': 20}}]
+
+
+best_models_M_and_Y_NN = [{{'name': 'Model with sigmoid activation function'
+, 'best_node': 20}
+, {'name': 'Model with Relu activation function', 'best_node': 16}
+, {'name': 'Model with tanh activation function', 'best_node': 18}}]
+
+
+
+best_models_L_and_Z_NN = [{{'name': 'Model with sigmoid activation function'
+, 'best_node': 19}
+, {'name': 'Model with Relu activation function', 'best_node': 15}
+, {'name': 'Model with tanh activation function', 'best_node': 19}}]
+
+
+
+
+
+
+
+
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_H_and_K_train_standard = sc.fit(X_H_and_K_train)
+cov_mat = np.cov(X_H_and_K_train.T)
+eigen_vals, eigen_vecs = np.linalg.eig(cov_mat)
+print(eigen_vals)
+tot = sum(eigen_vals)
+var_exp = [(i / tot) for i in sorted(eigen_vals, reverse = True)]
+cum_var_exp = np.cumsum(var_exp)
+plt.bar(range(1, 17) , var_exp, alpha = 0.5, align='center', label = 'individual explained variance')
+plt.step(range(1, 17), cum_var_exp, where ='mid', label = 'cumulative explained variance')
+plt.ylabel("Explained variance ratio")
+plt.xlabel('Principal componenets')
+plt.legend(loc = "best")
+plt.show()
+
+
+#数据导入
+header = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+data = pd.read_csv(r"Data\letter-recognition.data",names=header)
+#choose a pair of  H and K, 数据集中 0-733是H class 72，后面是K class 75 
+dataset_H = data.loc[data[0] == "H"]
+dataset_H = dataset_H.replace("H", ord("H")) 
+dataset_K = data.loc[data[0] == "K"]
+dataset_K = dataset_K.replace("K", ord("K")) 
+dataset_H_and_K = dataset_H.append(dataset_K, ignore_index=True)
+#M and Y, dataset_M_and_Y 0-791 是M class77， 后面的是Y class 89
+dataset_M = data.loc[data[0] == "M"]
+dataset_M = dataset_M.replace("M", ord("M")) 
+dataset_Y = data.loc[data[0] == "Y"]
+dataset_Y = dataset_Y.replace("Y", ord("Y")) 
+dataset_M_and_Y = dataset_M.append(dataset_Y, ignore_index=True )
+#L and Z, 总集合中 0-760是L class 76，后面的是Z class 90
+dataset_L = data.loc[data[0] == "L"]
+dataset_L = dataset_L.replace("L", ord("L")) 
+dataset_Z = data.loc[data[0] == "Z"]
+dataset_Z = dataset_Z.replace("Z", ord("Z")) 
+dataset_L_and_Z = dataset_L.append(dataset_Z, ignore_index=True )
+
+#split three dataset into train and test
+
+#pair of H and K
+X_H_and_K = np.array(dataset_H_and_K.drop(0, axis=1))
+Y_H_and_K = np.array(dataset_H_and_K[0])
+#pair of M and Y
+X_M_and_Y = np.array(dataset_M_and_Y.drop(0, axis=1))
+Y_M_and_Y = np.array(dataset_M_and_Y[0])
+#pair of L and Z
+X_L_and_Z = np.array(dataset_L_and_Z.drop(0, axis=1))
+Y_L_and_Z = np.array(dataset_L_and_Z[0])
+
+#Set training and testing set for each pair, after reshape they will become one row
+#pair of H and K
+X_H_and_K_train, X_H_and_K_value, Y_H_and_K_train, Y_H_and_K_value = train_test_split(X_H_and_K, Y_H_and_K , test_size=0.1, random_state=42) #42
+Y_H_and_K_train_reshaped = Y_H_and_K_train.reshape(-1, 1)
+Y_H_and_K_value_reshaped = Y_H_and_K_value.reshape(-1, 1)
+#pair of M and Y
+X_M_and_Y_train, X_M_and_Y_value, Y_M_and_Y_train, Y_M_and_Y_value = train_test_split(X_M_and_Y, Y_M_and_Y, test_size=0.1, random_state=42) #42
+Y_M_and_Y_train_reshaped = Y_M_and_Y_train.reshape(-1, 1)
+Y_M_and_Y_value_reshaped = Y_M_and_Y_value.reshape(-1, 1)
+#pair of M and Y
+X_L_and_Z_train, X_L_and_Z_value, Y_L_and_Z_train, Y_L_and_Z_value = train_test_split(X_L_and_Z, Y_L_and_Z, test_size=0.1, random_state=42) #42
+Y_L_and_Z_train_reshaped = Y_L_and_Z_train.reshape(-1, 1)
+Y_L_and_Z_value_reshaped = Y_L_and_Z_value.reshape(-1, 1)
+
+
+
+
+
+
+# k-nearest neighbors classifier
+MAX_K_1 = 20
+MAX_K_2 = 20
+MAX_K_3 = 20
+#For accuracy
+accuracies_H_and_K = np.zeros(MAX_K_1)
+accuracies_M_and_Y = np.zeros(MAX_K_2)
+accuracies_L_and_Z = np.zeros(MAX_K_3)
+
+
+
+
+def plot(accuracies_H_and_K):
+    # Plot accuracy
+    plt.plot(range(1, max_degree+ 1), accuracies_H_and_K, color = 'r', label = "accuracies_H_and_K")
+    plt.xlabel('The max degree of SVM with polynomial kernel') 
+    plt.ylabel('Accuracy')
+    plt.title('Cross validation result of SVM with polynomial kernel')
+    plt.legend()
+    plt.show()
+    plt.clf()
+
+
+# 减少数据量之后，SVM都不行，草：
+#pair of H and K
+X_H_and_K = np.array(dataset_H_and_K.drop(0, axis=1))
+X_H_and_K = X_H_and_K[0:800,:4]
+Y_H_and_K = np.array(dataset_H_and_K[0])
+Y_H_and_K = Y_H_and_K[0:800]
+
+#Set training and testing set for each pair, after reshape they will become one row
+#pair of H and K
+X_H_and_K_train, X_H_and_K_value, Y_H_and_K_train, Y_H_and_K_value = train_test_split(X_H_and_K, Y_H_and_K , test_size=0.1, random_state=1) 
+Y_H_and_K_train_reshaped = Y_H_and_K_train.reshape(-1, 1)
+Y_H_and_K_value_reshaped = Y_H_and_K_value.reshape(-1, 1)
+
+
+
+
+
+
+
+
+
+
+
+
+#NN with Sigmoid Function
+#One-hot, may be need to change position
+
+Y_H_and_K_train_oneHot = np.array(pd.get_dummies(Y_H_and_K_train))
+Y_M_and_Y_train_oneHot = np.array(pd.get_dummies(Y_M_and_Y_train))
+Y_L_and_Z_train_oneHot = np.array(pd.get_dummies(Y_L_and_Z_train))
+
+Y_H_and_K_value_oneHot = np.array(pd.get_dummies(Y_H_and_K_value))
+Y_M_and_Y_value_oneHot = np.array(pd.get_dummies(Y_M_and_Y_value))
+Y_L_and_Z_value_oneHot = np.array(pd.get_dummies(Y_L_and_Z_value))
+
+
+node_per_layer_H_and_K = np.arange(2,21,1)
+node_per_layer_M_and_Y = np.arange(2,21,1)
+node_per_layer_L_and_Z = np.arange(2,21,1)
+
+accuracies_H_and_K = np.zeros(len(node_per_layer_H_and_K))
+accuracies_M_and_Y = np.zeros(len(node_per_layer_M_and_Y))
+accuracies_L_and_Z = np.zeros(len(node_per_layer_L_and_Z))
+
+def NNSigmoid(node_per_layer, accuracies, X_pair_train, Y_pair_train_oneHot):
+    for i, input in enumerate(node_per_layer):
+        kf = KFold(n_splits = crossValidationFold)
+        mean_accuracy = 0
+        for train_index, test_index in kf.split(X_pair_train):
+            model = keras.Sequential(name="sigmoid_model")
+            model.add(layers.Dense(input, activation="sigmoid"))
+            model.add(layers.Dense(2, activation="softmax"))
+            model.compile(optimizer='adam', loss='categorical_crossentropy'
+            , metrics=['accuracy'])
+            
+            X_train_fold, X_test_fold = X_pair_train[train_index], X_pair_train[test_index]
+            Y_train_fold, Y_test_fold = Y_pair_train_oneHot[train_index], Y_pair_train_oneHot[test_index]
+            model.fit(X_train_fold, Y_train_fold, epochs = 10) 
+            
+            
+            _, val_acc = model.evaluate(X_test_fold, Y_test_fold)
+            mean_accuracy += val_acc
+        mean_accuracy /= crossValidationFold
+        accuracies[i] = mean_accuracy
+
+def plot(node_per_layer_H_and_K, node_per_layer_M_and_Y, node_per_layer_L_and_Z,
+accuracies_H_and_K, accuracies_M_and_Y, accuracies_L_and_Z):
+    # Plot accuracy
+    plt.plot(node_per_layer_H_and_K, accuracies_H_and_K, color = 'r', label = "accuracies_H_and_K")
+    plt.plot(node_per_layer_M_and_Y, accuracies_M_and_Y, color = 'g', label = "accuracies_M_and_Y")
+    plt.plot(node_per_layer_L_and_Z, accuracies_L_and_Z, color = 'b', label = "accuracies_L_and_Z")
+    plt.xlabel('Nodes in per layer count')
+    plt.ylabel('Accuracy')
+    plt.title('Cross validation result of deep neural network with sigmoid activation')
+    plt.legend()
+    plt.show()
+    plt.clf()
+
+def find_best_hyperparameter(accuracies, best_models, node_per_layer):
+    best_node = node_per_layer[np.argmax(accuracies)]
+    print('best node count per layer value for NN  with sigmoid is {} with mean accuracy{}'
+    .format(best_node, max(accuracies)))
+    best_models.append({
+        'name': 'Model with sigmoid activation function',
+        'best_node': best_node,
+    })
+
+
+
+NNSigmoid(node_per_layer_H_and_K, accuracies_H_and_K, X_H_and_K_train, Y_H_and_K_train_oneHot)
+NNSigmoid(node_per_layer_M_and_Y, accuracies_M_and_Y , X_M_and_Y_train, Y_M_and_Y_train_oneHot)
+NNSigmoid(node_per_layer_L_and_Z, accuracies_L_and_Z , X_L_and_Z_train, Y_L_and_Z_train_oneHot)
+#plot
+plot(node_per_layer_H_and_K, node_per_layer_M_and_Y, node_per_layer_L_and_Z,
+accuracies_H_and_K, accuracies_M_and_Y, accuracies_L_and_Z)
+#save the best hyperparameter
+find_best_hyperparameter(accuracies_H_and_K, best_models_H_and_K, node_per_layer_H_and_K)
+find_best_hyperparameter(accuracies_M_and_Y, best_models_M_and_Y, node_per_layer_M_and_Y)
+find_best_hyperparameter(accuracies_L_and_Z, best_models_L_and_Z, node_per_layer_L_and_Z)
+
+# sigmoid
+sigmoid_model_HK = keras.Sequential(name="sigmoid_model_HK")
+sigmoid_model_HK.add(layers.Dense(17, activation="sigmoid"))
+sigmoid_model_HK.add(layers.Dense(2, activation="softmax"))
+sigmoid_model_HK.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+sigmoid_model_MY = keras.Sequential(name="sigmoid_model_MY")
+sigmoid_model_MY.add(layers.Dense(20, activation="sigmoid"))
+sigmoid_model_MY.add(layers.Dense(2, activation="softmax"))
+sigmoid_model_MY.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+sigmoid_model_LZ = keras.Sequential(name="sigmoid_model_LZ")
+sigmoid_model_LZ.add(layers.Dense(19, activation="sigmoid"))
+sigmoid_model_LZ.add(layers.Dense(2, activation="softmax"))
+sigmoid_model_LZ.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+
+best_NN_model_HK = [
+    {
+        'model': sigmoid_model_HK,
+        'name': 'NN with Sigmoid activation',
+    }
+]
+
+best_NN_model_MY = [
+    {
+        'model': sigmoid_model_MY,
+        'name': 'NN with Sigmoid activation',
+    }
+]
+
+
+best_NN_model_LZ = [
+    {
+        'model': sigmoid_model_LZ,
+        'name': 'NN with Sigmoid activation',
+    }
+]
+
+
+
+Y_H_and_K_train_oneHot = np.array(pd.get_dummies(Y_H_and_K_train))
+Y_M_and_Y_train_oneHot = np.array(pd.get_dummies(Y_M_and_Y_train))
+Y_L_and_Z_train_oneHot = np.array(pd.get_dummies(Y_L_and_Z_train))
+
+Y_H_and_K_value_oneHot = np.array(pd.get_dummies(Y_H_and_K_value))
+Y_M_and_Y_value_oneHot = np.array(pd.get_dummies(Y_M_and_Y_value))
+Y_L_and_Z_value_oneHot = np.array(pd.get_dummies(Y_L_and_Z_value))
+
+
+def testDataset_NN(result_test_set, best_NN_model ,X_train, Y_train_oneHot, X_test, Y_test_oneHot):
+    for model in best_NN_model:
+        model = model['model']
+        start_training = time.time()
+        model.fit(X_train, Y_train_oneHot, epochs=30)
+        stop_training = time.time()  - start_training 
+        start_testing = time.time()
+        _, validation_accuracy = model.evaluate(X_test, Y_test_oneHot, verbose=2)
+        stop_testing = time.time() - start_testing
+        result_test_set.append({
+            'name': model.name,
+            'model training time' : stop_training * 1000,
+            'model operation time': stop_testing * 1000,
+            'validation_accuracy': validation_accuracy,
+        })
+
+testDataset_NN(result_test_set_HK , best_NN_model_HK ,X_H_and_K_train, Y_H_and_K_train_oneHot, X_H_and_K_value, Y_H_and_K_value_oneHot)
+testDataset_NN(result_test_set_MY, best_NN_model_MY ,X_M_and_Y_train, Y_M_and_Y_train_oneHot, X_M_and_Y_value, Y_M_and_Y_value_oneHot)
+testDataset_NN(result_test_set_LZ, best_NN_model_LZ ,X_L_and_Z_train, Y_L_and_Z_train_oneHot, X_L_and_Z_value, Y_L_and_Z_value_oneHot)
+
+
+
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_H_and_K_train_standard = sc.fit(X_H_and_K_train)
+cov_mat = np.cov(X_H_and_K_train.T)
+eigen_vals, eigen_vecs = np.linalg.eig(cov_mat)
+tot = sum(eigen_vals)
+var_exp = [(i / tot) for i in sorted(eigen_vals, reverse = True)]
+print(var_exp)
+cum_var_exp = np.cumsum(var_exp)
+plt.bar(range(1, 17) , var_exp, alpha = 0.5, align='center', label = 'individual explained variance')
+plt.step(range(1, 17), cum_var_exp, where ='mid', label = 'cumulative explained variance')
+plt.ylabel("Explained variance ratio")
+plt.xlabel('Principal componenets')
+plt.legend(loc = "best")
+plt.show()
+
+
+
+X_H_and_K_train_pca, X_H_and_K_test_pca =prePCA(X_H_and_K_train, X_H_and_K_value)
+
+X_M_and_Y_train_pca, X_M_and_Y_test_pca = prePCA(X_M_and_Y_train, X_M_and_Y_value)
+
+X_L_and_Z_train_pca, X_L_and_Z_test_pca =  prePCA(X_L_and_Z_train, X_L_and_Z_value)

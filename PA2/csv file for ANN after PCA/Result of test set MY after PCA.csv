@@ -1,0 +1,2 @@
+name,model training time,model operation time,validation_accuracy
+sigmoid_model_MY,970.7450867,38.87009621,0.968354404

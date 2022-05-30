@@ -1,0 +1,2 @@
+name,model training time,model operation time,validation_accuracy
+sigmoid_model_LZ,1077.002525,39.86954689,0.959999979
